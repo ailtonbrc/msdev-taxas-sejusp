@@ -1,0 +1,44 @@
+/* Limpa margens e padding padrão */
+body {
+  margin: 0;
+  padding: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  min-height: 100vh;
+  /* Garante que o body ocupe a altura total da viewport */
+}
+
+/* Garante que o root div do React ocupe a altura total */
+#root {
+  min-height: 100vh;
+}
+
+/* Tabela Customizada (Cabeçalho Azul e Zebrado) */
+.tabela-customizada .ant-table-thead>tr>th {
+  background-color: #004F9F !important;
+  /* Azul do Cabeçalho da App */
+  color: white !important;
+  font-weight: normal;
+  /* Sem negrito */
+  white-space: nowrap;
+  /* Impede quebra de linha no título */
+  padding: 4px 8px !important;
+  /* Altura reduzida */
+}
+
+.tabela-customizada .ant-table-tbody>tr>td {
+  padding: 4px 8px !important;
+}
+
+.tabela-customizada .ant-table-tbody>tr:nth-child(even) {
+  background-color: #f0f5ff;
+  /* Azul bem claro para zebrado */
+}
+
+.tabela-customizada .ant-table-tbody>tr:hover>td {
+  background-color: #e6f7ff !important;
+  /* Hover mais destacado */
+}

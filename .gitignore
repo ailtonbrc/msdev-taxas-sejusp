@@ -1,0 +1,36 @@
+# --- PROTEÇÃO DE DADOS SENSÍVEIS ---
+.env
+.env.*
+!.env.example
+
+# --- DEPENDÊNCIAS ---
+node_modules/
+vendor/
+frontend/node_modules/
+
+# --- BUILDS E BINÁRIOS ---
+dist/
+build/
+frontend/dist/
+backend/bin/
+*.exe
+*.bin
+
+# --- LOGS ---
+logs/
+*.log
+npm-debug.log*
+
+# --- IDE E SISTEMA ---
+.vscode/
+.idea/
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# --- TEMPORÁRIOS ---
+/tmp/
+.gemini/

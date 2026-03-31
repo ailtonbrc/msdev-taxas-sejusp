@@ -1,0 +1,25 @@
+[Unit]
+Description=Taxas SEJUSP Backend API
+After=network.target
+
+[Service]
+# Tipo simples para executaveis que rodam em foreground (padrao Go)
+Type=simple
+
+# Usuario que vai rodar o servico (ajuste se necessario, ex: ajbranco)
+User=root
+Group=root
+
+# Diretorio de trabalho e comando de execucao
+WorkingDirectory=/var/www/taxas-sejusp/backend
+ExecStart=/var/www/taxas-sejusp/backend/taxas_backend_linux
+
+# Variaveis de Ambiente (Se preferir, pode carregar do .env com EnvironmentFile)
+# EnvironmentFile=/var/www/taxas-sejusp/backend/.env
+
+# Reiniciar automaticamente se cair
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
