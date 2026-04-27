@@ -34,3 +34,9 @@ npm-debug.log*
 # --- TEMPORÁRIOS ---
 /tmp/
 .gemini/
+backend/dados_cache/*.db
+tfs_*.csv
+publish/
+taxasejusp.conf
+taxas-sejusp.service
+*.docx

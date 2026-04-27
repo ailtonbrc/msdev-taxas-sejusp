@@ -1,4 +1,5 @@
 export interface ITaxaSejusp {
+  instituicao: string;
   itemSubItem: string;
   descricao: string;
   tributo: string;
@@ -15,4 +16,22 @@ export interface IRespostaDadosTaxas {
   pagina_atual: number;
   limite_por_pagina: number;
   dados: ITaxaSejusp[];
+}
+
+export interface IOpcoesFiltros {
+  instituicoes: string[];
+  itens: string[];
+  tributos: string[];
+  municipios: string[];
+  referencias: string[];
+  ultimaAtualizacao: string;
+}
+
+export interface IFiltrosState {
+  itemSubItem: string[];
+  descricao: string;
+  tributo: string;
+  referencia: string[];
+  municipio: string[];
+  instituicao: string[];
 }

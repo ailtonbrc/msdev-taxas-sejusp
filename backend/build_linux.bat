@@ -5,10 +5,10 @@ set GOARCH=amd64
 
 echo [INFO] Compilando backend...
 if not exist "bin" mkdir bin
-go build -o bin/taxas_backend_linux .
+go build -o bin/taxas_backend .
 
 if %ERRORLEVEL% EQU 0 (
-    echo [SUCESSO] Binario criado em: bin\taxas_backend_linux
+    echo [SUCESSO] Binario criado em: bin\taxas_backend
     echo [INFO] Este arquivo esta pronto para ser enviado para o servidor Linux.
 ) else (
     echo [ERRO] Falha na compilacao.

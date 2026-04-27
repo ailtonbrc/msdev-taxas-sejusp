@@ -11,11 +11,11 @@ User=root
 Group=root
 
 # Diretorio de trabalho e comando de execucao
-WorkingDirectory=/var/www/taxas-sejusp/backend
-ExecStart=/var/www/taxas-sejusp/backend/taxas_backend_linux
+WorkingDirectory=/var/www/taxasejusp/backend
+ExecStart=/var/www/taxasejusp/backend/taxas_backend
 
-# Variaveis de Ambiente (Se preferir, pode carregar do .env com EnvironmentFile)
-# EnvironmentFile=/var/www/taxas-sejusp/backend/.env
+# Variaveis de Ambiente
+EnvironmentFile=/var/www/taxasejusp/backend/.env
 
 # Reiniciar automaticamente se cair
 Restart=always

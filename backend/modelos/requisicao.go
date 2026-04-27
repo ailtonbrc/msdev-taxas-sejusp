@@ -12,10 +12,12 @@ type ParametrosBusca struct {
 
 	NomeAdmin *string `form:"nomeAdmin" binding:"omitempty"`
 	Busca         string  `form:"busca" binding:"omitempty"`
-	ItemSubItem   string  `form:"itemSubItem" binding:"omitempty"`
+	ItemSubItem   []string `form:"itemSubItem"`
 	Descricao     string  `form:"descricao" binding:"omitempty"`
-	Tributo       string  `form:"tributo" binding:"omitempty"`
-	ReferenciaFlt string  `form:"referenciaFlt" binding:"omitempty"`
+	Tributo       []string `form:"tributo"`
+	ReferenciaFlt []string `form:"referenciaFlt"`
+	Municipio     []string `form:"municipio"`
+	Instituicao   []string `form:"instituicao"`
 }
 
 func (p *ParametrosBusca) Normalizar() {
@@ -25,6 +27,23 @@ func (p *ParametrosBusca) Normalizar() {
 	if p.Limite <= 0 {
 		p.Limite = 20
 	}
+
+	// Limpar strings vazias de slices (evita filtros fantasmas como ?tributo=)
+	p.ItemSubItem = limparSlice(p.ItemSubItem)
+	p.Tributo = limparSlice(p.Tributo)
+	p.ReferenciaFlt = limparSlice(p.ReferenciaFlt)
+	p.Municipio = limparSlice(p.Municipio)
+	p.Instituicao = limparSlice(p.Instituicao)
+}
+
+func limparSlice(s []string) []string {
+	var r []string
+	for _, v := range s {
+		if v != "" {
+			r = append(r, v)
+		}
+	}
+	return r
 }
 
 func (p *ParametrosBusca) CalcularOffset() int {

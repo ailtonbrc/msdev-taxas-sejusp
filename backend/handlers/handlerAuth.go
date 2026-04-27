@@ -1,8 +1,9 @@
 package handlers
 
 import (
-	"context"
 	"taxas-sejusp/backend/config"
+	"taxas-sejusp/backend/modelos"
+	"context"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -17,6 +18,15 @@ import (
 // IniciarLogin redireciona o usuário para a tela de login do provedor OIDC via Authorization Code Flow.
 func IniciarLogin(c *gin.Context) {
 	cfg := config.AppConfig
+
+	// --- SUPORTE AO MODO MOCK ---
+	if cfg.ModoAutenticacao == "mock" {
+		log.Println("[AUTH MOCK] Simulando sucesso de login.")
+		c.SetCookie("auth_token", "mock-token-secret-123", 3600, "/", "", false, true)
+		c.SetCookie("user_cpf", cfg.MockCpfCnpj, 3600, "/", "", false, false)
+		c.Redirect(http.StatusFound, "/")
+		return
+	}
 
 	// Constrói a URL de autorização baseada no provedor configurado
 	// Ex: https://des.id.ms.gov.br/auth/realms/ms/protocol/openid-connect/auth
@@ -140,52 +150,41 @@ func CallbackLogin(c *gin.Context) {
 		cpfCnpj = v // Fallback para o ID interno
 	}
 
-	// 4. Cria Sessão (Cookie Simples por enquanto)
-	// Define o cookie para durar 1 hora (3600s)
-	// TODO: Usar cookie assinado/encriptado em produção real para mais segurança
-	c.SetCookie("auth_token", tokenResp.AccessToken, 3600, "/", "", false, true)
-	c.SetCookie("user_cpf", cpfCnpj, 3600, "/", "", false, false) // Não HttpOnly para o frontend ler se precisar, ou HttpOnly e criar endpoint /me
+	// 4. Cria Sessão (Cookies)
+	c.SetCookie("auth_token", tokenResp.AccessToken, 3600*8, "/", "", false, true)
+	c.SetCookie("user_cpf", cpfCnpj, 3600*8, "/", "", false, false)
+	c.SetCookie("user_name", nome, 3600*8, "/", "", false, false) // ✅ Novo cookie com o nome real do e-Fazenda
 
 	// Log de sucesso
-	log.Printf("Login realizado com sucesso: %s (%s)", nome, cpfCnpj)
-
-	// Redireciona para o Frontend
-	// Se estiver rodando local com frontend em outra porta (Ex: 5173), redirecionar para lá.
-	// Em produção, frontend e backend costumam estar no mesmo dominio.
-	// Assumindo que o User está rodando frontend na porta padrao do Vite (5173) ou 80 em prod.
-	// Pelo prompt, não temos certeza absoluta da URL do frontend, mas vamos redirecionar para '/' relativo
-	// Se for desenvolvimento separado, pode precisar de ajuste.
-	// O api.ts sugere /api proxy.
+	log.Printf("Login e-Fazenda realizado: %s (%s)", nome, cpfCnpj)
 	c.Redirect(http.StatusFound, "/")
+}
+
+// SairLogin limpa os cookies de sessão.
+func SairLogin(c *gin.Context) {
+	c.SetCookie("auth_token", "", -1, "/", "", false, true)
+	c.SetCookie("user_cpf", "", -1, "/", "", false, false)
+	c.JSON(http.StatusOK, gin.H{"mensagem": "Logoff realizado com sucesso"})
 }
 
 // VerificarUsuario retorna os dados do usuário logado.
 func VerificarUsuario(c *gin.Context) {
-	cfg := config.AppConfig
-
-	// Se estiver em modo mock, retorna o mock
-	if cfg.ModoAutenticacao == "mock" {
-		c.JSON(http.StatusOK, gin.H{
-			"nome":        "Homologação",
-			"cpf":         cfg.MockCpfCnpj,
-			"autenticado": true,
-		})
-		return
-	}
-
-	// Modo Real: verifica o contexto (populado pelo middleware)
-	cpf, exists := c.Get(ChaveUsuarioCpfCnpj)
+	// Obtém as informações do usuário injetadas pelo middleware
+	userObj, exists := c.Get(ChaveUsuarioInfo)
 	if !exists {
 		c.JSON(http.StatusUnauthorized, gin.H{"autenticado": false})
 		return
 	}
 
-	// Poderíamos guardar o nome no cookie também ou buscar no banco
-	// Por simplificação recuperamos apenas o CPF validado do middleware
-	c.JSON(http.StatusOK, gin.H{
-		"nome":        "Usuário Autenticado", // Placeholder, ideal seria vir do token/sessão
-		"cpf":         cpf,
-		"autenticado": true,
+	user := userObj.(modelos.Usuario)
+
+	c.JSON(http.StatusOK, modelos.RespostaUsuario{
+		ID:           user.ID,
+		Nome:         user.Nome,
+		CPF:          user.CPF,
+		Role:         user.Role,
+		Instituicoes: user.Instituicoes,
+		Autenticado:  true,
 	})
 }
 

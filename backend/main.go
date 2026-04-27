@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"taxas-sejusp/backend/config"
 	"taxas-sejusp/backend/handlers"
+	"taxas-sejusp/backend/servicos"
 	"fmt"
 	"log"
 	"net/http"
@@ -33,9 +34,21 @@ func main() {
 
 	err = db.Ping()
 	if err != nil {
-		log.Fatal("Erro fatal ao pingar o SQL Server: ", err.Error())
+		log.Printf("AVISO: SQL Server inacessível no momento (%v). O servidor continuará em execução e tentará reconectar em background.", err)
 	}
-	log.Println("Conexão com SQL Server estabelecida com sucesso.")
+	// --- Inicialização do Cache de Dados (Performance) ---
+	log.Println("Carregando banco de dados para a memória (cache)...")
+	if err := servicos.GlobalCache.Carregar(db); err != nil {
+		log.Printf("Aviso: Falha ao carregar cache inicial: %v", err)
+	}
+
+	// ✅ Inicializa o banco de dados de usuários e permissões
+	if err := servicos.IniciarServicoUsuario(); err != nil {
+		log.Fatalf("Falha crítica ao iniciar serviço de usuários: %v", err)
+	}
+	
+	// ✅ Ativa o agendador de atualização (06h, 12h, 16h)
+	servicos.IniciarSincronizacaoAutomatica(db)
 
 	// --- Desliga o modo Debug do Gin ---
 	gin.SetMode(gin.ReleaseMode)
@@ -69,16 +82,28 @@ func main() {
 		{
 			authGroup.GET("/login", handlers.IniciarLogin)
 			authGroup.GET("/callback", handlers.CallbackLogin)
-			authGroup.GET("/user", handlers.VerificarUsuario)
+			authGroup.GET("/user", handlers.AuthRequired(), handlers.VerificarUsuario) // ✅ Middleware adicionado
+			authGroup.GET("/logout", handlers.SairLogin)
+			authGroup.POST("/mock-login", handlers.MockLoginSimulado)
+		}
+
+		// Gestão de Usuários
+		adminGroup := api.Group("/usuarios")
+		adminGroup.Use(handlers.AuthRequired())
+		{
+			adminGroup.GET("/", handlers.ListarUsuarios)
+			adminGroup.POST("/", handlers.SalvarUsuario)
+			adminGroup.DELETE("/:id", handlers.ExcluirUsuario)
 		}
 
 		taxasGroup := api.Group("/taxas")
-		// taxasGroup.Use(handlers.AuthRequired()) // Desabilitado temporariamente para produção rápida
+		taxasGroup.Use(handlers.AuthRequired()) // Reativado para proteger os dados
 		{
-			// Rota de Dados (JSON)
 			taxasGroup.GET("/dados", handlers.ListarDadosTaxas(db))
-			// Rota de Exportação (Excel)
 			taxasGroup.GET("/exportar", handlers.ExportarDadosExcel(db))
+			taxasGroup.GET("/exportar-csv", handlers.ExportarDadosCSV(db))
+			taxasGroup.GET("/opcoes-filtros", handlers.ObterOpcoesFiltros)
+			taxasGroup.POST("/refresh", handlers.RecarregarCache(db))
 		}
 	}
 

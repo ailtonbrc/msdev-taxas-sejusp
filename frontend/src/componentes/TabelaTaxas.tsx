@@ -3,19 +3,13 @@ import { Table, Typography } from 'antd';
 import type { ColumnsType } from 'antd/es/table'; 
 import './TabelaTaxas.css'; 
 import api from '../servicos/api';
-import type { ITaxaSejusp, IRespostaDadosTaxas } from '../tipos/taxas';
+import type { ITaxaSejusp, IRespostaDadosTaxas, IFiltrosState } from '../tipos/taxas';
 
 const { Text } = Typography;
 
-interface FiltrosState {
-  itemSubItem?: string;
-  descricao?: string;
-  tributo?: string;
-  referencia?: string;
-}
-
 interface TabelaTaxasProps {
-    filtros: FiltrosState;
+    filtros: IFiltrosState;
+    isGuest?: boolean;
 }
 
 interface TabelaState {
@@ -27,7 +21,7 @@ interface TabelaState {
 }
 
 
-const TabelaTaxas: React.FC<TabelaTaxasProps> = ({ filtros }) => {
+const TabelaTaxas: React.FC<TabelaTaxasProps> = ({ filtros, isGuest }) => {
   const [estado, setEstado] = useState<TabelaState>({
     dados: [],
     totalRegistros: 0,
@@ -40,6 +34,11 @@ const TabelaTaxas: React.FC<TabelaTaxasProps> = ({ filtros }) => {
     pagina: number = estado.paginaAtual, 
     limite: number = estado.limitePorPagina
   ) => {
+    if (isGuest) {
+        setEstado(prev => ({ ...prev, dados: [], totalRegistros: 0, loading: false }));
+        return;
+    }
+
     setEstado(prev => ({ ...prev, loading: true }));
     
     try {
@@ -47,11 +46,23 @@ const TabelaTaxas: React.FC<TabelaTaxasProps> = ({ filtros }) => {
       params.append('pagina', String(pagina));
       params.append('limite', String(limite)); 
       
-      // Filtros do Dashboard (Barra Superior)
-      if (filtros.itemSubItem) params.append('itemSubItem', filtros.itemSubItem);
+      // Filtros do Dashboard (Seleção Múltipla)
+      if (filtros.itemSubItem && filtros.itemSubItem.length > 0) {
+        filtros.itemSubItem.forEach(v => params.append('itemSubItem', v));
+      }
+      if (filtros.referencia && filtros.referencia.length > 0) {
+        filtros.referencia.forEach(v => params.append('referenciaFlt', v));
+      }
+      if (filtros.municipio && filtros.municipio.length > 0) {
+        filtros.municipio.forEach(v => params.append('municipio', v));
+      }
+      if (filtros.instituicao && filtros.instituicao.length > 0) {
+        filtros.instituicao.forEach(v => params.append('instituicao', v));
+      }
+
+      // Filtros Simples
       if (filtros.descricao) params.append('descricao', filtros.descricao);
       if (filtros.tributo) params.append('tributo', filtros.tributo);
-      if (filtros.referencia) params.append('referenciaFlt', filtros.referencia);
 
       const url = `/taxas/dados?${params.toString()}`;
       
@@ -85,6 +96,15 @@ const TabelaTaxas: React.FC<TabelaTaxasProps> = ({ filtros }) => {
   };
 
   const colunas: ColumnsType<ITaxaSejusp> = [
+    { 
+      title: 'Instituição', 
+      dataIndex: 'instituicao', 
+      key: 'instituicao', 
+      width: 150,
+      fixed: 'left',
+      render: (text: string) => <Text strong>{text}</Text>,
+      sorter: (a, b) => a.instituicao.localeCompare(b.instituicao)
+    },
     { 
       title: <div style={{ lineHeight: '1.2' }}>Item/<br/>SubItem</div>, 
       dataIndex: 'itemSubItem', 
@@ -138,6 +158,15 @@ const TabelaTaxas: React.FC<TabelaTaxasProps> = ({ filtros }) => {
       sorter: (a, b) => a.municipio.localeCompare(b.municipio)
     },
     { 
+      title: 'Qtd UFERMS', 
+      dataIndex: 'quantidadeUferms', 
+      key: 'quantidadeUferms', 
+      width: 95, 
+      align: 'right',
+      render: (v) => v.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }),
+      sorter: (a, b) => a.quantidadeUferms - b.quantidadeUferms
+    },
+    { 
       title: 'Valor Principal', 
       dataIndex: 'valorPrincipal', 
       key: 'valorPrincipal', 
@@ -145,15 +174,6 @@ const TabelaTaxas: React.FC<TabelaTaxasProps> = ({ filtros }) => {
       align: 'right',
       render: (v) => formatarMoeda(v),
       sorter: (a, b) => a.valorPrincipal - b.valorPrincipal
-    },
-    { 
-      title: 'Qtd UFERMS', 
-      dataIndex: 'quantidadeUferms', 
-      key: 'quantidadeUferms', 
-      width: 95, 
-      align: 'right',
-      render: (v) => v.toLocaleString('pt-BR', { minimumFractionDigits: 0, maximumFractionDigits: 0 }),
-      sorter: (a, b) => a.quantidadeUferms - b.quantidadeUferms
     },
     { 
       title: 'Valor Total', 

@@ -1,10 +1,7 @@
-/* Estilo Zebrado - Regra de Ouro (Datagrid) */
-.tabela-taxas-container .ant-table-tbody > tr:nth-child(even) > td {
-    background-color: #f8f8f8 !important; 
+.tabela-taxas-container .ant-table-tbody>tr:nth-child(even)>td {
+    background-color: #f8f8f8 !important;
 }
 
-.tabela-taxas-container .ant-table-tbody > tr:hover > td {
+.tabela-taxas-container .ant-table-tbody>tr:hover>td {
     background-color: #e6f7ff !important;
 }
-
-
