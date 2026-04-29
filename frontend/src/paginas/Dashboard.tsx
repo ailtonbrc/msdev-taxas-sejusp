@@ -98,6 +98,7 @@ const Dashboard: React.FC = () => {
               <span>Acesso Restrito - Solicitação de Permissão</span>
             </Space>
           }
+          
           open={showAccessModal}
           onCancel={() => setShowAccessModal(false)}
           footer={[

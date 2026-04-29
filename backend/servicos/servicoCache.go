@@ -500,7 +500,7 @@ func (cm *CacheManager) ExportarExcel(params modelos.ParametrosBusca, targetPath
 			refStr = fmt.Sprintf("%s/%s", refStr[4:], refStr[:4])
 		}
 
-		// Gravar linha (Stream)
+		// Gravar linha
 		row := []interface{}{
 			d.Instituicao,
 			d.ItemSubItem,

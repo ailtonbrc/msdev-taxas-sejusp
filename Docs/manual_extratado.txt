@@ -1,0 +1,82 @@
+
+--- Page 1 ---
+Unidade de Gestão de Sistemas deAtendimento ao ContribuinteUGSIS-CONTRI
+Novembro de 2022
+Cadastro e Autenticação de sistemascom o Portal ICMS Transparente
+Este documento contém informações sensíveis. Qualquer reprodução total ou parcial, compartilhamento ou usoimpróprio deste conteúdo sem autorização prévia do autor é expressamente proibido.
+Contato equipe G04Telefone: (67) 3318-3525Atendimento a suporte e bugs:efazenda@fazenda.ms.gov.brAtendimento a novas demandas e dúvidas:csisg04@fazenda.ms.gov.br
+1
+
+--- Page 2 ---
+Conteúdo
+Cadastro e Autenticação de sistemas com o Portal ICMS Transparente 1Contato equipe G04 1
+Cadastro de um novo Sistema 3
+Cadastro de Módulos 4
+Cadastro de Níveis 5
+Cadastro de Operação por Nível 7
+Acesso por Grupo 8
+Autenticação com API 9
+2
+--- Page 3 ---
+Cadastro de um novo Sistema
+O cadastro de umsistema será realizado e mantido pela equipe da Unidade de Gestão deSistemas de Atendimento ao Contribuinte UGSIS-CONTRI, para realizar o cadastro oualteração de informações de um sistema deverá ser encaminhado para o e-mailcsisg04@fazenda.ms.gov.br os dados abaixo.
+● Nome do Sistema - exemplo SAP.● Descrição do Sistema - exemplo Solicitação de Abertura de Protocolo.● Imagem do sistema.○ Será criada pelaequipededesign, paraissopedimosquejuntodasolicitaçãoseja encaminhado ideias de sugestão para o ícone.● URL do sistema - exemplo https://servicos.efazenda.ms.gov.br/sap.Após a criação o time responderá a solicitação e partir desse momento a equipe dedesenvolvedores responsáveis pelo sistema poderá cadastrar os menuseoperaçõesdoseusistema.Osistemaserácadastradocomumalistadeperfil padrãoestabelecidapelaCOTIN,quepodeser consultada nessa planilhadeexemplo, nelapossui todososperfisqueosistemapoderáutilizar e também a quem se destina cada um dos perfis.
+3
+--- Page 4 ---
+Cadastro de Módulos
+DentrodoportalasopçõesdosistemasãoorganizadoemumahierarquiadeMódulos,NíveleOperação por Nível, o módulo será dentro de umsistema os menus que normalmente éapresentado ao topo de cada sistema na horizontal, conformeexemploabaixo, ondeoSAPtem os módulos Cadastro, Solicitações e Serviços.
+Pararealizar ocadastrodosmódulos, acesseoAdministrativodoPortal ,apósacessara opção Administrar Portal/ Controle de Módulos/ Incluir.
+Na tela de cadastro deve selecionar o sistema que deseja, no campo de Módulo deve serinformado o nome do Módulo que será apresentado como menu conforme exemploapresentado acima do SAP. No campo Ordemdeve ser informadoaordemqueomóduloeclicar em “Incluir” para salvar.
+4
+
+--- Page 5 ---
+Cadastro de Níveis
+Como o ICMS Transparente trabalha comHierarquia, é possível que dentro de ummóduloseja cadastrado níveisdentrodele. Nãoéobrigatórioqueomódulopossuaníveiseleéumaopção a mais para atender os sistema que tenha sub-menus.
+Para cadastrar um nível acesse Administrar Portal/ Controle de Níveis/ Incluir.
+Selecione o Sistema, após qual o MóduloeemseguidaocampoCódigodoNível vocêdeveclicar emumdas opções listadas à direita na árvore de módulo e níveis que ocamposerápreenchido conforme imagem abaixo.
+O campo de descrição é onde será informado o nome que deseja que apareça.
+OcampodeURLéoendereçodentrodasuaaplicaçãoporexemplosenocadastrodosistemavocê informou a URL https://servicos.efazenda.ms.gov.br/sap logo nesse campo vocêinformará o endereço /Cadastro/NovoModeloDocumento.
+O campo ordem será preenchido sempre com a seguinte ordem disponível.
+O campo Aberto ICMS Transparente? deixar sempre desmarcado.
+EoscamposSomenteacessoviaintranet?eSomenteacessocomcertificaçãoDigital?marcarconforme a necessidade do seu sistema.
+5
+
+--- Page 6 ---
+6
+
+--- Page 7 ---
+Cadastro de Operação por Nível
+Aoperaçãopor nível éondeérealizadoocadastrodasopçõesqueserãodisponibilizadasemtelaparaousuáriodosistema, por exemplodentrodeumateladecadastrotemosasopçõesde Criar, Editar, Visualizar e Excluir. É nesse momento que é realizado o cadastro dessasopções que posteriormente serão liberadas ou não para cada Grupo “Perfil” do sistema.
+Para cadastrar um nível acesse Administrar Portal/ Controle de Operação por Nível/ Incluir.
+Após bastar escolher o sistema e o módulo que deseja cadastrar a operação.
+O campo nível será preenchido quando você clicar emuma das opções listadas a direitaconforme a imagem abaixo.
+Escolher o nome da opção na lista de operações e mandar incluir.
+7
+
+--- Page 8 ---
+Acesso por Grupo
+Oacesso por grupo é onde édefinidooquecadaGrupo(“Perfil”deusuário) terádeacessodentro do sistema.
+Para realizar o cadastro das permissões do grupo acesse Administrar Portal/ Controle deAcesso por Grupo/ Alterar.
+Após, basta escolher o sistema, o módulo qual deseja, ogrupoqueoICMSTransparenteirácarregar à direita da tela a árvore de Módulo, Nível e Operações.
+Nacolunadaediçãoéondevocêpoderádesmarcaroumarcarquaisoperaçõesumgrupoteráacesso ou não, quando a operação estiver marcada o grupo terá acesso e quandodesmarcada o grupo não terá acesso.
+A coluna de visualização será apresentada as opções que ogrupotemdeacessoindicandocom ✅  que o grupo possui acesso e com ❌  que ele não possui acesso.
+Após realizar as marcações basta clicar em aplicar para salvar.
+Existe a opçãodecopiar acessodeoutrogrupoparafacilitar ocadastro, bastaselecionar dequal grupo deseja copiar.
+8
+
+--- Page 9 ---
+Autenticação com API
+A API de autenticação é mantida pela equipe da Unidade de Gestão deSistemasdeAtendimento ao Contribuinte UGSIS-CONTRI, para solicitar permissão de acesso deverá serencaminhado um e-mail paracsisg04@fazenda.ms.gov.br.
+Caso a equipe solicitante possua o usuário consumer (Keycloak) o e-mail deve ser enviadosolicitando permissão para o referido usuário (client id).
+Casoaequipenãopossuaousuárioconsumer (Keycloak) deveráencaminharoe-mailcomonomedaaplicaçãoeequiperesponsável.Apósacriaçãodousuárioosolicitantereceberáume-mail com os dados para acesso (url, client e secret).
+9
+--- Page 10 ---
+Obter acessos da pessoa autenticada
+Aoclicar emumsistema/banner noPortal e-Fazenda, égeradoumhashepassadonaurl dorespectivo sistema. Exemplo: Ao clicar no sistema ʻCadastroʼ seráabertaumanovaguianonavegador com o id do hash.https://hom.cadastro.ms.gov.br/Home/Login?id=7f56b9a965ab2643a003
+Para obter/recuperar as informações do usuário autenticado/logado, osistemaclientedevegerar umtokendeacessodeacordocomoambiente(homologaçãoouprodução)eacessaraAPI de autenticação do Portal com o token gerado passando o hash da url.
+Exemplo:http://hom.gw.sgi.ms.gov.br/k0363/authenticationproxyapi/v1/User/7f56b9a965ab2643a003
+10
+
+--- Page 11 ---
+Exemplo de retorno da API
+11

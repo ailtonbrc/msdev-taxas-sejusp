@@ -11,7 +11,8 @@ const api = axios.create({
     'Content-Type': 'application/json',
   },
   paramsSerializer: {
-    indexes: null // Previne o envio de colchetes [] em parâmetros de array, compatível com o backend Go (Gin)
+    indexes: null
+    // Previne o envio de colchetes [] em parâmetros de array, compatível com o backend Go (Gin)
   }
 });
 

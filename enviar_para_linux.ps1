@@ -14,6 +14,7 @@ echo "[1/5] Compilando Backend para Linux..."
 cd backend
 $env:GOOS="linux"
 $env:GOARCH="amd64"
+$env:CGO_ENABLED="0"
 go build -o bin/taxas_backend .
 if ($LASTEXITCODE -ne 0) { echo "ERRO: Falha no build do Go"; exit }
 cd ..

@@ -6,7 +6,6 @@ import (
 	"taxas-sejusp/backend/servicos"
 	"log"
 	"net/http"
-	"os"
 
 	"github.com/gin-gonic/gin"
 )
@@ -23,17 +22,9 @@ func AuthRequired() gin.HandlerFunc {
 		
 		if err == nil && cpfCookie != "" {
 			cpfUsuario = cpfCookie
-		} else if cfg.ModoAutenticacao == "mock" {
-			// 2. Se for MOCK e não houver cookie, usa o fallback do .env ou config
-			cpfUsuario = os.Getenv("MOCK_CPF_CNPJ")
-			if cpfUsuario == "" {
-				cpfUsuario = cfg.MockCpfCnpj
-			}
-			if cpfUsuario == "" {
-				cpfUsuario = "admin" 
-			}
 		} else {
-			// 3. Se for REAL e não houver cookie, barramos o acesso
+			// 2. Se não houver cookie (independente de ser Mock ou Real), barramos o acesso
+			// Isso força o redirecionamento para a tela de login no frontend
 			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"erro": "Usuário não autenticado"})
 			return
 		}

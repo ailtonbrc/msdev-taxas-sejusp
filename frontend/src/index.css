@@ -26,7 +26,6 @@ body {
   white-space: nowrap;
   /* Impede quebra de linha no título */
   padding: 4px 8px !important;
-  /* Altura reduzida */
 }
 
 .tabela-customizada .ant-table-tbody>tr>td {

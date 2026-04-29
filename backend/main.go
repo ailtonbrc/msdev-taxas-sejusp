@@ -82,6 +82,7 @@ func main() {
 		{
 			authGroup.GET("/login", handlers.IniciarLogin)
 			authGroup.GET("/callback", handlers.CallbackLogin)
+			authGroup.GET("/portal-login", handlers.PortalLogin) // ✅ Nova rota para o e-Fazenda (ICMS Transparente)
 			authGroup.GET("/user", handlers.AuthRequired(), handlers.VerificarUsuario) // ✅ Middleware adicionado
 			authGroup.GET("/logout", handlers.SairLogin)
 			authGroup.POST("/mock-login", handlers.MockLoginSimulado)
@@ -108,12 +109,10 @@ func main() {
 	}
 
 	serverAddr := fmt.Sprintf(":%s", cfg.ServerPort)
-
-	// ✅ CORREÇÃO: LOG EXPLICITO DA PORTA
-	log.Printf("Servidor escutando em http://localhost%s", serverAddr)
+	log.Printf("[SISTEMA] Servidor iniciado e escutando em %s", serverAddr)
 
 	if err := router.Run(serverAddr); err != nil {
-		log.Fatal("Erro server: ", err.Error())
+		log.Fatalf("[ERRO FATAL] Falha ao subir servidor HTTP: %v", err)
 	}
 }
 

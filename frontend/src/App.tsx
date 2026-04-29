@@ -8,7 +8,7 @@ import 'dayjs/locale/pt-br';
 
 import Dashboard from './paginas/Dashboard';
 import Usuarios from './paginas/Usuarios';
-import Login from './paginas/Login';
+import Login from './paginas/PortalLogin';
 import api from './servicos/api';
 
 dayjs.locale('pt-br');
@@ -38,7 +38,7 @@ const App: React.FC = () => {
         setUsuario(null);
       }
     } catch (error: any) {
-      // 401 é esperado se não estiver logado, não tratamos como erro crítico no console
+      // 401 é esperado se não estiver logado, não será tratado como erro crítico no console
       if (error.response?.status !== 401) {
         console.error('Erro ao carregar usuário:', error);
       }
@@ -56,10 +56,11 @@ const App: React.FC = () => {
     try {
       await api.get('/auth/logout');
       setUsuario(null);
-      // Redirecionamento forçado para limpar estados
-      window.location.href = '/login';
+      // Redireciona o usuário de volta para o Portal e-Fazenda oficial
+      window.location.href = 'https://it.fazenda.ms.gov.br/';
     } catch (error) {
       console.error('Erro ao sair:', error);
+      window.location.href = 'https://it.fazenda.ms.gov.br/';
     }
   };
 

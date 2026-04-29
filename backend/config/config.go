@@ -23,6 +23,7 @@ type Config struct {
 	EfazendaClientSecret string
 	EfazendaRedirectURI  string
 	OidcProviderURL      string // Novo campo para a URL base do provedor OIDC
+	PortalApiURL         string // Novo campo para a URL da API do Portal e-Fazenda
 }
 
 // AppConfig é uma instância global (singleton) de nossas configurações.
@@ -64,6 +65,7 @@ func CarregarConfig() {
 		EfazendaClientSecret: os.Getenv("EFAZENDA_CLIENT_SECRET"),
 		EfazendaRedirectURI:  os.Getenv("EFAZENDA_REDIRECT_URI"),
 		OidcProviderURL:      os.Getenv("OIDC_PROVIDER_URL"),
+		PortalApiURL:         os.Getenv("PORTAL_API_URL"),
 	}
 
 	// Validação
@@ -71,7 +73,7 @@ func CarregarConfig() {
 		log.Fatal("FATAL: Variáveis de banco não definidas.")
 	}
 	if AppConfig.EfazendaClientID == "" {
-		log.Fatal("FATAL: EFAZENDA_CLIENT_ID não definida.")
+		log.Println("AVISO: EFAZENDA_CLIENT_ID não definida no .env. O login via Portal e-Fazenda ficará inativo.")
 	}
 
 	if AppConfig.ModoAutenticacao == "mock" {

@@ -188,3 +188,147 @@ func VerificarUsuario(c *gin.Context) {
 	})
 }
 
+// PortalLogin valida o ID recebido pelo redirecionamento do e-Fazenda.
+func PortalLogin(c *gin.Context) {
+	cfg := config.AppConfig
+	idHash := c.Query("id")
+
+	if idHash == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"erro": "ID não fornecido"})
+		return
+	}
+
+	// 1. Obter Access Token da Aplicação (Client Credentials)
+	tokenEndpoint := fmt.Sprintf("%s/protocol/openid-connect/token", cfg.OidcProviderURL)
+	data := url.Values{}
+	data.Set("grant_type", "client_credentials")
+	data.Set("client_id", cfg.EfazendaClientID)
+	data.Set("client_secret", cfg.EfazendaClientSecret)
+
+	reqToken, _ := http.NewRequestWithContext(context.Background(), "POST", tokenEndpoint, strings.NewReader(data.Encode()))
+	reqToken.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+
+	client := &http.Client{}
+	respToken, err := client.Do(reqToken)
+	if err != nil {
+		log.Printf("[ERRO] Falha de rede ao obter token do Keycloak: %v", err)
+		c.JSON(http.StatusBadGateway, gin.H{"erro": "Falha de conexão com o provedor de identidade"})
+		return
+	}
+	defer respToken.Body.Close()
+
+	if respToken.StatusCode != http.StatusOK {
+		bodyErr, _ := io.ReadAll(respToken.Body)
+		log.Printf("[ERRO] Keycloak recusou o Client Credentials (Status %d): %s", respToken.StatusCode, string(bodyErr))
+		c.JSON(http.StatusUnauthorized, gin.H{
+			"erro": "Falha na autenticação do sistema (Keycloak)",
+			"detalhes": string(bodyErr),
+			"status": respToken.StatusCode,
+			"endpoint": tokenEndpoint,
+		})
+		return
+	}
+
+	var tokenResp struct {
+		AccessToken string `json:"access_token"`
+	}
+	if err := json.NewDecoder(respToken.Body).Decode(&tokenResp); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"erro": "Falha ao ler token da aplicação"})
+		return
+	}
+
+	// 2. Chamar a API Proxy do Portal (e-Fazenda)
+	log.Printf("[DEBUG] Token obtido do Keycloak (tamanho: %d). Início: %s...", len(tokenResp.AccessToken), tokenResp.AccessToken[:10])
+
+	portalApiUrl := cfg.PortalApiURL
+	if portalApiUrl == "" {
+		portalApiUrl = "http://gw.sgi.ms.gov.br/k0363/authenticationproxyapi/v3/User"
+	}
+	
+	userInfoEndpoint := fmt.Sprintf("%s/%s", portalApiUrl, idHash)
+	reqUserInfo, _ := http.NewRequestWithContext(context.Background(), "GET", userInfoEndpoint, nil)
+	reqUserInfo.Header.Set("Authorization", "Bearer "+tokenResp.AccessToken)
+
+	respUserInfo, err := client.Do(reqUserInfo)
+	if err != nil {
+		log.Printf("[ERRO] Falha ao comunicar com API Proxy do Portal: %v", err)
+		c.JSON(http.StatusBadGateway, gin.H{"erro": "Falha ao obter dados do portal"})
+		return
+	}
+	defer respUserInfo.Body.Close()
+
+	bodyBytes, _ := io.ReadAll(respUserInfo.Body)
+	if respUserInfo.StatusCode != http.StatusOK {
+		log.Printf("[ERRO] API Proxy do Portal retornou erro %d: %s", respUserInfo.StatusCode, string(bodyBytes))
+		c.JSON(http.StatusUnauthorized, gin.H{
+			"erro": "O Portal e-Fazenda recusou o ID fornecido",
+			"detalhes": string(bodyBytes),
+			"status": respUserInfo.StatusCode,
+		})
+		return
+	}
+
+	// 3. Processar Retorno (JSON)
+	// Log completo da resposta bruta para facilitar o mapeamento dos campos
+	log.Printf("[DEBUG] Resposta bruta da API do Portal e-Fazenda: %s", string(bodyBytes))
+
+	var userInfo map[string]interface{}
+	if err := json.Unmarshal(bodyBytes, &userInfo); err != nil {
+		log.Printf("[ERRO] Falha ao decodificar JSON do Portal: %s", string(bodyBytes))
+		c.JSON(http.StatusInternalServerError, gin.H{"erro": "Falha ao ler dados do usuário"})
+		return
+	}
+
+	// Exibindo todos os campos para debug
+	log.Printf("[DEBUG] Campos retornados pelo Portal:")
+	for chave, valor := range userInfo {
+		log.Printf("  -> %s = %v", chave, valor)
+	}
+
+	// Tentar mapear campos (a estrutura exata depende do retorno, logando para debug inicial se necessário)
+	// Vamos tentar chaves comuns
+	nome := "Usuário Portal"
+	if n, ok := userInfo["Name"].(string); ok {
+		nome = n
+	} else if n, ok := userInfo["Nome"].(string); ok {
+		nome = n
+	} else if n, ok := userInfo["name"].(string); ok {
+		nome = n
+	}
+
+	cpfCnpj := ""
+	if v, ok := userInfo["CpfCnpj"].(string); ok {
+		cpfCnpj = v
+	} else if v, ok := userInfo["cpfCnpj"].(string); ok {
+		cpfCnpj = v
+	} else if v, ok := userInfo["cpf"].(string); ok {
+		cpfCnpj = v
+	} else if v, ok := userInfo["preferred_username"].(string); ok {
+		cpfCnpj = v
+	}
+
+	if cpfCnpj == "" {
+		log.Printf("[AVISO] CPF/CNPJ não encontrado no JSON do portal: %v", userInfo)
+		// Podemos tentar extrair de um array ou outro formato de acordo com o manual (pág 11)
+		// Faremos fallback para o ID se tudo falhar para debug
+		c.JSON(http.StatusInternalServerError, gin.H{"erro": "Formato de dados do portal não reconhecido"})
+		return
+	}
+
+	// 4. Criação da Sessão
+	// Simulando um auth_token local para satisfazer o middleware, 
+	// ou usar o próprio tokenResp.AccessToken (embora seja da aplicação, não do user, o middleware só checa existência)
+	c.SetCookie("auth_token", tokenResp.AccessToken, 3600*8, "/", "", false, true)
+	c.SetCookie("user_cpf", cpfCnpj, 3600*8, "/", "", false, false)
+	c.SetCookie("user_name", nome, 3600*8, "/", "", false, false)
+
+	log.Printf("[SUCESSO] Login Portal e-Fazenda realizado: %s (%s)", nome, cpfCnpj)
+
+	c.JSON(http.StatusOK, gin.H{
+		"mensagem": "Login realizado com sucesso via Portal",
+		"nome":     nome,
+		"cpf":      cpfCnpj,
+	})
+}
+
+
